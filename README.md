@@ -181,6 +181,9 @@ python 08_interactive_dashboard.py
 This project is licensed under the MIT License.
 
 ---
+## 👤 Instructor
+**Panigrahi Srikanth**
+- GitHub: [@srikanth5](https://github.com/srikanth5)
 
 ## 👤 Author
 
