@@ -1,0 +1,49 @@
+# ── Python ────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual Environments ──────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── IDE / Editor ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.claude/
+
+# ── OS Files ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Large Data Files (too big for GitHub) ─────────────────────────
+*.csv
+*.xlsx
+*.xls
+*.pkl
+*.pickle
+*.parquet
+*.h5
+*.hdf5
+
+# ── Model Artifacts ───────────────────────────────────────────────
+*.model
+*.bin
+
+# ── Node / Dashboard ─────────────────────────────────────────────
+node_modules/
+package-lock.json
+
+# ── Miscellaneous ─────────────────────────────────────────────────
+*.log
+*.tmp
+lib/

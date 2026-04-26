@@ -1,0 +1,347 @@
+=================== STAGE 4 — EMBEDDING GENERATION ===================
+
+────────────────────────────────────────────────────────────
+  Configuration
+────────────────────────────────────────────────────────────
+
+  Input file    : yt_stage3_output.csv  (305,145 rows, 50 cols)
+  Sample size   : 20,000 rows  (random_state=42)
+  Output file   : yt_stage4_embeddings.pkl  (1,766.7 MB)
+  Runtime       : ~446 seconds
+
+
+────────────────────────────────────────────────────────────
+  TF-IDF
+────────────────────────────────────────────────────────────
+
+  Shape         : (20000, 8000)  — sparse matrix
+  max_features  : 8,000
+  ngram_range   : (1, 2)  — unigrams + bigrams
+  min_df        : 2  |  max_df : 0.95
+  sublinear_tf  : True
+  Density       : ~2%  (sparse)
+  Build time    : 13.2 s
+
+
+────────────────────────────────────────────────────────────
+  Word2Vec  (Gensim)
+────────────────────────────────────────────────────────────
+
+  Shape         : (20000, 128)  — dense float32
+  vector_size   : 128  |  window : 5  |  min_count : 1
+  epochs        : 10   |  workers : 4  |  seed : 42
+  Aggregation   : mean-pool over tokens
+  Vocab size    : 255,083
+  Build time    : 31.4 s
+
+  Top similar to 'music':
+    ncs                  0.7345
+    background           0.6892
+    bgm                  0.6772
+    beats                0.6620
+    saregama             0.6568
+    credits              0.6530
+    composed             0.6527
+    performing           0.6511
+    tracks               0.6509
+    track                0.6485
+
+
+────────────────────────────────────────────────────────────
+  FastText  (Gensim)
+────────────────────────────────────────────────────────────
+
+  Shape         : (20000, 128)  — dense float32
+  vector_size   : 128  |  window : 5  |  min_count : 1
+  epochs        : 10   |  workers : 4  |  seed : 42
+  Character n-grams — handles OOV words
+  Vocab size    : 255,083
+  Build time    : 157.1 s
+
+
+────────────────────────────────────────────────────────────
+  Label Distribution  (sentiment_label)
+────────────────────────────────────────────────────────────
+
+  negative     6,474   (32.4%)
+  neutral      6,674   (33.4%)
+  positive     6,852   (34.3%)
+  ─────────────────────────────
+  Total       20,000  (100.0%)
+
+  Derived from like_view_ratio percentile splits:
+    top 34%  → positive
+    bottom 33% → negative
+    middle 33% → neutral
+
+
+────────────────────────────────────────────────────────────
+  Embedding Comparison
+────────────────────────────────────────────────────────────
+  Technique    Shape              Type         Dim    Build Time
+  ──────────────────────────────────────────────────────────
+  TF-IDF       (20000, 8000)      sparse      8000        13.2 s
+  Word2Vec     (20000, 128)       dense        128        31.4 s
+  FastText     (20000, 128)       dense        128       157.1 s
+
+  PKL file size : 1852.5 MB
+
+[STAGE 4 DONE]
+================= STAGE 5 — DIMENSIONALITY REDUCTION =================
+
+  Loading yt_stage5_reduced.pkl (0.5 MB) ...
+  Loaded.
+
+────────────────────────────────────────────────────────────
+  Configuration
+────────────────────────────────────────────────────────────
+
+  Base embedding : Word2Vec (20,000 × 128), L2-normalised
+  t-SNE sample   : ≤ 5,000 pts  (PCA pre-reduce to 50-dim first)
+  UMAP  sample   : ≤ 8,000 pts
+  Random state   : 42
+
+
+────────────────────────────────────────────────────────────
+  Results
+────────────────────────────────────────────────────────────
+  Method      Points  Shape             Silhouette
+  ──────────────────────────────────────────────────
+  PCA         20,000  (20000, 2)           -0.0248
+  t-SNE        5,000  (5000, 2)            -0.0231
+  UMAP         8,000  (8000, 2)            -0.0212
+
+────────────────────────────────────────────────────────────
+  PCA Details
+────────────────────────────────────────────────────────────
+  n_components  : 2
+  PC1 range     : [-0.4325, 0.8697]
+  PC2 range     : [-0.6564, 0.5544]
+  All points    : 20,000
+
+────────────────────────────────────────────────────────────
+  t-SNE Details
+────────────────────────────────────────────────────────────
+  perplexity    : 30  |  max_iter : 500
+  Pre-reduced   : PCA → 50 dims before t-SNE
+  Points used   : 5,000
+  x range       : [-35.73, 38.60]
+  y range       : [-37.35, 34.42]
+
+────────────────────────────────────────────────────────────
+  UMAP Details
+────────────────────────────────────────────────────────────
+  n_neighbors   : 15  |  min_dist : 0.1  |  metric : cosine
+  Points used   : 8,000
+  x range       : [-0.11, 12.20]
+  y range       : [3.05, 16.11]
+
+────────────────────────────────────────────────────────────
+  Plots Saved
+────────────────────────────────────────────────────────────
+  plot_reduction_combined.png                  574 KB
+  plot_reduction_pca.png                       394 KB
+  plot_reduction_tsne.png                      162 KB
+  plot_reduction_umap.png                      202 KB
+
+[STAGE 5 DONE]
+============== STAGE 6 — GPU-ACCELERATED CLASSIFICATION ==============
+
+  Loading yt_stage6_results.pkl (0.6 MB) ...
+  Loaded.
+
+────────────────────────────────────────────────────────────
+  Configuration
+────────────────────────────────────────────────────────────
+
+  GPU           : NVIDIA GeForce RTX 3050 Laptop GPU (4.3 GB VRAM)
+  CUDA version  : 12.4  |  PyTorch : 2.6.0+cu124
+  Train/Test    : 80% / 20%  stratified split
+  Sample size   : 20,000 rows  →  train=16,000  test=4,000
+  Label classes : negative / neutral / positive
+
+
+────────────────────────────────────────────────────────────
+  All Model Results  (sorted by F1 ↓)
+────────────────────────────────────────────────────────────
+  #    Embedding     Model                      Acc      F1    Prec     Rec     AUC    Time
+  ────────────────────────────────────────────────────────────────────────────────────────────
+  1    Word2Vec      LightGBM                0.5015  0.5009  0.5009  0.5015  0.6892   21.9s
+  2    Word2Vec      XGBoost                 0.4993  0.4987  0.4990  0.4993  0.6913    7.0s
+  3    TF-IDF        Logistic Regression     0.4978  0.4968  0.4963  0.4978  0.6835   67.8s
+  4    FastText      PyTorch MLP             0.4983  0.4958  0.4954  0.4983  0.6812    6.0s
+  5    Word2Vec      PyTorch MLP             0.4948  0.4946  0.4947  0.4948  0.6818    5.7s
+  6    TF-IDF        XGBoost                 0.4948  0.4929  0.4922  0.4948  0.6856   62.7s
+  7    FastText      XGBoost                 0.4930  0.4922  0.4918  0.4930  0.6793    6.9s
+  8    TF-IDF        LightGBM                0.4928  0.4909  0.4908  0.4928  0.6794   39.6s
+  9    FastText      LightGBM                0.4873  0.4864  0.4859  0.4873  0.6804   12.8s
+  10   TF-IDF        PyTorch MLP             0.4795  0.4787  0.4782  0.4795  0.6559   16.1s
+  11   Word2Vec      Linear SVM              0.4770  0.4695  0.4708  0.4770  0.6572    3.5s
+  12   Word2Vec      Logistic Regression     0.4733  0.4688  0.4691  0.4733  0.6578    0.8s
+  13   TF-IDF        Linear SVM              0.4693  0.4687  0.4683  0.4693  0.6541    3.2s
+  14   FastText      Linear SVM              0.4655  0.4590  0.4599  0.4655  0.6512    3.4s
+  15   FastText      Logistic Regression     0.4620  0.4573  0.4567  0.4620  0.6505    0.8s
+
+────────────────────────────────────────────────────────────
+  Best Model per Embedding
+────────────────────────────────────────────────────────────
+
+  [TF-IDF]  →  Logistic Regression
+    Accuracy  : 0.4978
+    F1        : 0.4968
+    Precision : 0.4963
+    Recall    : 0.4978
+    AUC-ROC   : 0.6835
+    Train time: 67.8s
+
+    Classification Report:
+                    precision    recall  f1-score   support
+      
+          negative       0.53      0.53      0.53      1295
+           neutral       0.43      0.41      0.42      1335
+          positive       0.53      0.56      0.54      1370
+      
+          accuracy                           0.50      4000
+         macro avg       0.50      0.50      0.50      4000
+      weighted avg       0.50      0.50      0.50      4000
+
+  [Word2Vec]  →  LightGBM
+    Accuracy  : 0.5015
+    F1        : 0.5009
+    Precision : 0.5009
+    Recall    : 0.5015
+    AUC-ROC   : 0.6892
+    Train time: 21.9s
+
+    Classification Report:
+                    precision    recall  f1-score   support
+      
+          negative       0.53      0.51      0.52      1295
+           neutral       0.45      0.44      0.44      1335
+          positive       0.52      0.56      0.54      1370
+      
+          accuracy                           0.50      4000
+         macro avg       0.50      0.50      0.50      4000
+      weighted avg       0.50      0.50      0.50      4000
+
+  [FastText]  →  PyTorch MLP
+    Accuracy  : 0.4983
+    F1        : 0.4958
+    Precision : 0.4954
+    Recall    : 0.4983
+    AUC-ROC   : 0.6812
+    Train time: 6.0s
+
+    Classification Report:
+                    precision    recall  f1-score   support
+      
+          negative       0.53      0.55      0.54      1295
+           neutral       0.45      0.39      0.42      1335
+          positive       0.51      0.55      0.53      1370
+      
+          accuracy                           0.50      4000
+         macro avg       0.50      0.50      0.50      4000
+      weighted avg       0.50      0.50      0.50      4000
+
+────────────────────────────────────────────────────────────
+  Overall Best
+────────────────────────────────────────────────────────────
+  Embedding  : Word2Vec
+  Model      : LightGBM
+  F1         : 0.5009
+  AUC-ROC    : 0.6892
+  Train time : 21.9s
+
+────────────────────────────────────────────────────────────
+  Classification Plots Saved
+────────────────────────────────────────────────────────────
+  plot_clf_fasttext.png                                   48 KB
+  plot_clf_tf-idf.png                                     46 KB
+  plot_clf_word2vec.png                                   47 KB
+  plot_cm_fasttext.png                                    31 KB
+  plot_cm_tf-idf.png                                      31 KB
+  plot_cm_word2vec.png                                    31 KB
+
+[STAGE 6 DONE]
+================== STAGE 7 — INTERACTIVE DASHBOARD ===================
+
+────────────────────────────────────────────────────────────
+  Configuration
+────────────────────────────────────────────────────────────
+
+  URL           : http://127.0.0.1:8050
+  Framework     : Plotly Dash 2.x + dash-bootstrap-components (FLATLY theme)
+  Data cache    : yt_dashboard_cache.parquet  (fast load via pyarrow)
+  Embeddings    : yt_stage5_reduced.pkl  →  UMAP scatter
+  Model metrics : yt_stage6_results.pkl  →  F1 leaderboard
+
+
+────────────────────────────────────────────────────────────
+  Filters
+────────────────────────────────────────────────────────────
+
+  Language dropdown  — top 20 languages + "All"
+  Sentiment filter   — positive / negative / neutral / All
+  Engagement tier    — high / medium / low / All
+  UMAP colour mode   — sentiment_label / eff_lang / engagement_tier
+
+
+────────────────────────────────────────────────────────────
+  Dashboard Charts  (9 components)
+────────────────────────────────────────────────────────────
+  [KPI Cards (4)]                 Total videos · Languages · Avg views · Avg engagement
+  [Language Bar]                  Top 15 languages, count with annotation
+  [Sentiment Pie]                 3-class donut (positive=green, negative=red, neutral=grey)
+  [Engagement Box Plot]           Engagement score by top-10 language, outliers shown
+  [Monthly Time Series]           Video upload trend from 2015, spline + area fill
+  [UMAP Scatter]                  2D projection, WebGL render, colour by selected axis
+  [Model F1 Bar]                  All 15 model×embedding combos ranked by F1 (horizontal)
+  [Lang×Sentiment Heatmap]        Top-15 languages × 3 sentiments (%, RdYlGn colorscale)
+
+────────────────────────────────────────────────────────────
+  All Pipeline Output Files
+────────────────────────────────────────────────────────────
+
+  File                                         Size  Description
+  ──────────────────────────────────────────────────────────────────────────────────
+  yt_stage1_output.csv                     964.8 MB  Stage 1  — 306,571 rows × 44 cols
+  yt_stage3_output.csv                    1277.8 MB  Stage 3  — 305,145 rows × 50 cols  (clean_text)
+  yt_stage4_embeddings.pkl                1852.5 MB  Stage 4  — TF-IDF + Word2Vec + FastText
+  yt_stage5_reduced.pkl                      0.5 MB  Stage 5  — PCA / t-SNE / UMAP coords
+  yt_stage6_results.pkl                      0.6 MB  Stage 6  — 15 classifier result dicts
+  yt_dashboard_cache.parquet                MISSING  Stage 7  — lightweight dashboard cache
+
+────────────────────────────────────────────────────────────
+  EDA Plots  (yt_eda_outputs/)
+────────────────────────────────────────────────────────────
+  plot10_engagement_vs_sentiment.png                        27 KB
+  plot1_language_dist.png                                   43 KB
+  plot2_sentiment_dist.png                                  38 KB
+  plot3_engagement_dist.png                                 72 KB
+  plot4_upload_hour.png                                     46 KB
+  plot5_upload_day.png                                      25 KB
+  plot6_title_length_by_lang.png                            36 KB
+  plot7_correlation_heatmap.png                            100 KB
+  plot8_avg_engagement_by_lang.png                          34 KB
+  plot9_publish_year.png                                    35 KB
+  plot_clf_fasttext.png                                     48 KB
+  plot_clf_tf-idf.png                                       46 KB
+  plot_clf_word2vec.png                                     47 KB
+  plot_cm_fasttext.png                                      31 KB
+  plot_cm_tf-idf.png                                        31 KB
+  plot_cm_word2vec.png                                      31 KB
+  plot_reduction_combined.png                              574 KB
+  plot_reduction_pca.png                                   394 KB
+  plot_reduction_tsne.png                                  162 KB
+  plot_reduction_umap.png                                  202 KB
+
+[STAGE 7 DONE]
+
+================= PIPELINE COMPLETE  — Stages 4 → 7 ==================
+
+  Stage 4  Embedding Generation     ✓  TF-IDF + Word2Vec + FastText
+  Stage 5  Dimensionality Reduction ✓  PCA + t-SNE + UMAP
+  Stage 6  GPU Classification       ✓  5 models × 3 embeddings (RTX 3050)
+  Stage 7  Interactive Dashboard    ✓  http://127.0.0.1:8050
+
+======================================================================
