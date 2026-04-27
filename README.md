@@ -190,3 +190,6 @@ This project is licensed under the MIT License.
 **MANIDEEP KANDURI**
 
 - GitHub: [@Manideepkan](https://github.com/Manideepkan)
+  
+  **VISHRUDH KONTHAM**
+- GitHub: [@Vishu31k](https://github.com/Vishu31k)
